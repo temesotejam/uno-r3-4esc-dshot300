@@ -1,0 +1,33 @@
+name: Build Arduino Uno R3 firmware
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/setup-arduino-cli@v2
+      - name: Install Arduino AVR core
+        run: |
+          arduino-cli core update-index
+          arduino-cli core install arduino:avr
+      - name: Compile for Arduino Uno R3
+        run: |
+          mkdir -p build
+          arduino-cli compile \
+            --fqbn arduino:avr:uno \
+            --warnings all \
+            --output-dir build \
+            UnoR3_Potentiometer_4ESC_DShot300
+      - name: Upload compiled HEX
+        uses: actions/upload-artifact@v4
+        with:
+          name: uno-r3-4esc-dshot300-hex
+          path: |
+            build/*.hex
+            build/*.elf
+          if-no-files-found: error
