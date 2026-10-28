@@ -10,7 +10,7 @@
 4. **アップロード**を実行する。追加ライブラリは不要。
 5. 必要ならシリアルモニタ（115200bps）で `A0`、`DShot`、`enabled` を確認する。
 
-[GitHub Actionsのビルド結果](../../actions/workflows/build-arduino.yml)から、検証済みの `.hex` を含むZIPも取得できます（`arduino-cli` によるビルド成果物）。通常はArduino IDEで上記のINOを書き込む方法が最も簡単です。**GitHubページ上の「書き込み」ボタンから直接Unoへ転送する機能はありません。**
+[GitHub Actionsのビルド結果](https://github.com/temesotejam/uno-r3-4esc-dshot300/actions/workflows/build-arduino.yml)から、検証済みの `.hex` を含むZIPも取得できます（`arduino-cli` によるビルド成果物）。通常はArduino IDEで上記のINOを書き込む方法が最も簡単です。**GitHubページ上の「書き込み」ボタンから直接Unoへ転送する機能はありません。**
 
 ## 配線
 
@@ -56,4 +56,4 @@ ESCの主電源は仕様に適合する別電源（これまでの構成では1S
 - `UnoR3_Potentiometer_4ESC_DShot300/README.txt`：元の配布ZIPの説明文
 - `LICENSE`：GPL-3.0。DShotの波形生成部分は以前のスケッチを継承し、その祖先の [arduino-bi-directional-dshot](https://github.com/bird-sanctuary/arduino-bi-directional-dshot) にクレジットがあります。
 
-[ビルドの検証結果](../../actions/workflows/build-arduino.yml)はGitHub Actionsで確認できます。コンパイルの成功は実機の信号波形の保証ではありません。
+[ビルドの検証結果](https://github.com/temesotejam/uno-r3-4esc-dshot300/actions/workflows/build-arduino.yml)はGitHub Actionsで確認できます。コンパイルの成功は実機の信号波形の保証ではありません。
