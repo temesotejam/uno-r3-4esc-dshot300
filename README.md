@@ -2,6 +2,20 @@
 
 **実機で4基のモーターが動作した構成を保存したリポジトリです。** Arduino Uno R3（ATmega328P、16 MHz）から、**単方向DShot300を4系統同時に生成**し、可変抵抗1つで4基へ**同じ**スロットル指令を送ります。SBUSやPicoは使用しません。
 
+## Web書き込みページ（Arduino IDE不要）
+
+**[Arduino Uno R3へUSBで書き込む](https://temesotejam.github.io/uno-r3-4esc-dshot300/)**
+
+- PCの **Google Chrome または Microsoft Edge**（Web Serial対応版）で開いてください。モバイル版ブラウザやFirefox / Safariは非対応です。
+- Uno R3のUSBをPCへ接続し、Arduino IDEのシリアルモニタなどCOMポートを使うアプリを閉じてください。
+- **ESC用LiPoを取り外し、プロペラも外して**ください。バッテリーを接続したままフラッシュ操作しないでください。
+- ページの確認チェックを入れ「接続してUno R3に書き込む」を押し、対象のCOMポートを選びます。
+- ページは最新のGitHub ActionsでUno R3向けにビルドした `firmware.hex` を使用し、**STK500v1 / 115200bps** のブートローダー通信で書き込み、フラッシュの読み戻し一致まで検証します。
+- 書き込みに失敗した場合、以前のスケッチが不完全になっている可能性があります。その場合はArduino IDEで再書き込みしてください。USB接続だけでなく、従来のブートローダーがArduinoに入っている必要があります。
+- GitHub Pagesが未設定の場合は、リポジトリの **Settings → Pages → Build and deployment → Source: GitHub Actions** に切り替える必要があります。[公開ワークフロー](https://github.com/temesotejam/uno-r3-4esc-dshot300/actions/workflows/build-arduino.yml)
+
+このページはWeb Serialを使ってPCからUnoへ直接書き込みます。UNOのUSBデータがサイトのサーバーに送信されることはありません。ファームウェアのコンパイルはGitHub Actions側で行い、ブラウザは生成済みHEXを書き込みます。
+
 ## Arduino IDEから書き込む
 
 1. [`UnoR3_Potentiometer_4ESC_DShot300`](./UnoR3_Potentiometer_4ESC_DShot300) フォルダの **`UnoR3_Potentiometer_4ESC_DShot300.ino`** をダウンロードする（またはリポジトリをZIPで取得）。
@@ -10,7 +24,7 @@
 4. **アップロード**を実行する。追加ライブラリは不要。
 5. 必要ならシリアルモニタ（115200bps）で `A0`、`DShot`、`enabled` を確認する。
 
-[GitHub Actionsのビルド結果](https://github.com/temesotejam/uno-r3-4esc-dshot300/actions/workflows/build-arduino.yml)から、検証済みの `.hex` を含むZIPも取得できます（`arduino-cli` によるビルド成果物）。通常はArduino IDEで上記のINOを書き込む方法が最も簡単です。**GitHubページ上の「書き込み」ボタンから直接Unoへ転送する機能はありません。**
+[GitHub Actionsのビルド結果](https://github.com/temesotejam/uno-r3-4esc-dshot300/actions/workflows/build-arduino.yml)から、検証済みの `.hex` を含むZIPも取得できます（`arduino-cli` によるビルド成果物）。通常はArduino IDEで上記のINOを書き込む方法が最も簡単です。ブラウザから直接書き込む方法も用意しました（下記「Web書き込みページ」参照）。
 
 ## 配線
 
