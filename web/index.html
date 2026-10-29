@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1621">
+  <title>Uno R3 · 4ESC DShot300 書き込み</title>
+  <meta name="description" content="Arduino Uno R3へ、可変抵抗で4基のESCを同時制御するDShot300ファームウェアをUSBから書き込みます。">
+  <style>
+    :root{color-scheme:dark;--bg:#0b1520;--surface:#152332;--border:#314556;--fg:#e9f0f8;--muted:#a5b7c8;--accent:#58d1ba}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse 90% 42% at 50% -5%,#194050 0%,transparent 80%),var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+    main{max-width:820px;margin:0 auto;padding:52px 22px 74px}
+    a{color:#8ce6d6;text-underline-offset:3px}
+    header{margin:0 0 38px}.eyebrow{color:var(--accent);font-weight:700;letter-spacing:.1em;font-size:12px;text-transform:uppercase;margin:0 0 10px}
+    h1{font-size:clamp(30px,5vw,45px);line-height:1.16;letter-spacing:-.03em;margin:0 0 16px}h2{font-size:20px;margin:0 0 16px;letter-spacing:-.01em}
+    p{margin:0 0 16px;color:var(--muted)}.lead{font-size:17px;max-width:650px}
+    .panel{border:1px solid var(--border);background:var(--surface);border-radius:14px;padding:26px;margin:18px 0}
+    .meta{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0 0}
+    .pill{border:1px solid #456070;color:#cee1ed;border-radius:999px;padding:5px 11px;font-size:12px}
+    .primary{background:var(--accent);border:0;color:#06251e;font-weight:750;font-size:16px;border-radius:10px;padding:14px 22px;cursor:pointer;width:100%;margin:14px 0 0}
+    .primary:hover:not(:disabled){filter:brightness(1.07)}.primary:disabled{opacity:.48;cursor:not-allowed}
+    .check{display:flex;align-items:flex-start;gap:12px;cursor:pointer;padding:8px 0;color:var(--fg)}
+    input[type=checkbox]{width:21px;height:21px;accent-color:var(--accent);margin:2px 0 0;flex-shrink:0}
+    .notice{border-left:3px solid #ecb96d;padding:9px 14px;background:#302b29;color:#f8dfbb;border-radius:2px 8px 8px 2px;font-size:14px;margin:16px 0}
+    .summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:20px 0}
+    .stat{background:#0e1b29;border:1px solid #2a4554;padding:14px;border-radius:9px}
+    .stat small{display:block;color:var(--muted);font-size:12px}.stat b{display:block;font-size:17px;word-break:break-word}
+    ol{margin:8px 0 0;padding-left:24px}li{margin:7px 0;color:var(--fg)}
+    .status{padding:12px 15px;border-radius:9px;border:1px solid #436578;background:#0d2433;font-size:14px;margin:18px 0 8px}
+    .status.error{border-color:#a85e5c;background:#35222a}.status.success{border-color:#3b8d7b;background:#15332f}
+    progress{width:100%;height:12px;accent-color:var(--accent);margin:10px 0}
+    .quiet{font-size:13px;color:var(--muted)}code{font-size:.92em;background:#0a1825;border:1px solid #294154;padding:2px 5px;border-radius:4px}
+    table{border-collapse:collapse;width:100%}td{border-bottom:1px solid var(--border);padding:10px 8px}td:first-child{width:130px;color:var(--muted)}
+    footer{margin-top:40px;font-size:13px;color:var(--muted)}footer a{color:#b5ded9}
+    #log{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;max-height:170px;overflow:auto;background:#0b1722;border:1px solid #294154;border-radius:7px;padding:12px;color:#b6ccdc}
+    @media(max-width:560px){main{padding:27px 15px 40px}.panel{padding:20px}.summary{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Uno R3 · Web Serial firmware writer</p>
+    <h1>USBからプログラムを書き込む</h1>
+    <p class="lead">Arduino IDEを起動せず、<strong style="color:var(--fg)">Arduino Uno R3</strong>へ動作確認済みの「可変抵抗 → 4系統DShot300」プログラムを書き込みます。</p>
+    <div class="meta"><span class="pill">Arduino Uno R3 専用</span><span class="pill">Windows · Chrome / Edge</span><span class="pill">書き込み後に読み戻し検証</span></div>
+  </header>
+  <section class="panel" aria-labelledby="firmware-title">
+    <h2 id="firmware-title">書き込むファームウェア</h2>
+    <p>GitHub Actionsで、リポジトリの最新スケッチからビルドしたHEXを使用します。ソースコードの編集や自動改変はしません。</p>
+    <div class="summary">
+      <div class="stat"><small>対象</small><b>ATmega328P / 16MHz</b></div>
+      <div class="stat"><small>信号出力</small><b>D8・D9・D10・D11</b></div>
+      <div class="stat"><small>ファームウェア</small><b id="fw-size">読み込み中</b></div>
+    </div>
+    <div class="quiet">コードの版：<span id="build-id">確認中</span>　 ·　 <a href="./firmware.hex" download="uno-r3-4esc-dshot300.hex">HEXを保存</a></div>
+  </section>
+  <section class="panel" aria-labelledby="upload-title">
+    <h2 id="upload-title">書き込み</h2>
+    <ol>
+      <li>モーターの<strong>プロペラを外し</strong>、ESCのLiPoを取り外します。</li>
+      <li>Uno R3をUSBケーブルでPCへ接続します。</li>
+      <li>Arduino IDEのシリアルモニタ等、COMポートを使用するソフトを閉じます。</li>
+      <li>下の確認欄をチェックして「接続して書き込む」を押し、UnoのCOMポートを選択します。</li>
+    </ol>
+    <div class="notice">書き込み操作により現在Unoに入っているプログラムは上書きされます。ESCは別途バッテリー給電のため、書き込み中は必ずLiPoを外してください。</div>
+    <label class="check"><input id="safe" type="checkbox"><span>プロペラ・ESC用LiPoを外し、Arduino Uno R3をUSB接続しました。</span></label>
+    <button type="button" class="primary" id="flash" disabled>ファームウェアを準備しています…</button>
+    <div id="status" class="status" role="status" aria-live="polite">最新ファームウェアを読み込んでいます。</div>
+    <progress id="progress" max="100" value="0" aria-label="書き込み進捗"></progress>
+    <details><summary class="quiet">処理ログを表示</summary><pre id="log" aria-label="書き込みログ"></pre></details>
+  </section>
+  <section class="panel">
+    <h2>配線・プログラムの動作</h2>
+    <table>
+      <tr><td>可変抵抗</td><td>両端：5V / GND、中央端子：A0</td></tr>
+      <tr><td>ESC信号</td><td>D8 / D9 / D10 / D11から単方向DShot300</td></tr>
+      <tr><td>停止</td><td>つまみ最小でDShot 0を送信</td></tr>
+      <tr><td>起動条件</td><td>電源投入後3秒停止→つまみ最小を0.6秒保持</td></tr>
+    </table>
+    <p class="quiet" style="margin:18px 0 0">パソコンに認識されない場合はデータ通信対応USBケーブルを確認してください。Unoの互換品によっては別途USBシリアルドライバが必要です。標準Uno R3のOptiboot（115200bps/STK500v1）が対象です。</p>
+  </section>
+  <footer>
+    <a href="https://github.com/temesotejam/uno-r3-4esc-dshot300">GitHubでコードを見る</a>
+    <p style="margin-top:8px">ブラウザはUSB接続されたUnoへローカルに書き込みます。ファームウェアやシリアルデータを外部サーバーへ送信しません。Chrome / Edgeのデスクトップ版が必要です。</p>
+  </footer>
+</main>
+<script type="module" src="./app.mjs"></script>
+</body>
+</html>
