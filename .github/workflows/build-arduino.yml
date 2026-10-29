@@ -1,12 +1,15 @@
-name: Build Arduino Uno R3 firmware
+name: Build Arduino Uno R3 and publish browser flasher
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  compile:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,7 +18,9 @@ jobs:
         run: |
           arduino-cli core update-index
           arduino-cli core install arduino:avr
-      - name: Compile for Arduino Uno R3
+      - name: Test Web Serial HEX parser and programming protocol
+        run: node --test web/tests/*.test.mjs
+      - name: Compile user-tested sketch for Uno R3
         run: |
           mkdir -p build
           arduino-cli compile \
@@ -23,7 +28,8 @@ jobs:
             --warnings all \
             --output-dir build \
             UnoR3_Potentiometer_4ESC_DShot300
-      - name: Upload compiled HEX
+          test -s build/UnoR3_Potentiometer_4ESC_DShot300.ino.hex
+      - name: Upload compiled HEX for Arduino users
         uses: actions/upload-artifact@v4
         with:
           name: uno-r3-4esc-dshot300-hex
@@ -31,3 +37,29 @@ jobs:
             build/*.hex
             build/*.elf
           if-no-files-found: error
+      - name: Package browser programming site
+        run: |
+          mkdir -p _site
+          cp web/index.html web/app.mjs web/stk500.mjs _site/
+          cp build/UnoR3_Potentiometer_4ESC_DShot300.ino.hex _site/firmware.hex
+          printf '{"commit":"%s","board":"arduino:avr:uno","protocol":"STK500v1"}\n' "$GITHUB_SHA" > _site/build.json
+          touch _site/.nojekyll
+          test -s _site/firmware.hex
+      - name: Upload GitHub Pages site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
